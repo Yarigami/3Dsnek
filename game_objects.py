@@ -18,8 +18,8 @@ class Snake:
         self.segment_length = 1
         self.position_length = self.segment_length + 1
         self.segment_positions = [Vec3(randrange(MAP_SIZE) + 0.5, randrange(MAP_SIZE) + 0.5, -0.5)]
-        self.segment_entities = []
-        self.create_segment(self.segment_positions[0])
+        self.segment_entities = [Entity(model = 'sphere', color = color.green, position=self.segment_positions[0])]
+        #self.create_segment(self.segment_positions[0])
         self.directions = {'a': Vec3(-1, 0, 0), 'd': Vec3(1, 0, 0), 'w': Vec3(0, 1, 0), 's': Vec3(0, -1, 0)}
         self.direction = Vec3(0, 0, 0)
         self.permissions = {'a': 1, 'd': 1, 'w': 1, 's': 1}
