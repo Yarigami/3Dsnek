@@ -13,17 +13,19 @@ class Apple(Entity):
 
 
 class Snake:
-    def __init__(self, MAP_SIZE):
+    def __init__(self, MAP_SIZE, controls, color):
         self.MAP_SIZE = MAP_SIZE
         self.segment_length = 1
         self.position_length = self.segment_length + 1
         self.segment_positions = [Vec3(randrange(MAP_SIZE) + 0.5, randrange(MAP_SIZE) + 0.5, -0.5)]
-        self.segment_entities = [Entity(model = 'sphere', color = color.green, position=self.segment_positions[0])]
-        #self.create_segment(self.segment_positions[0])
-        self.directions = {'a': Vec3(-1, 0, 0), 'd': Vec3(1, 0, 0), 'w': Vec3(0, 1, 0), 's': Vec3(0, -1, 0)}
+        self.segment_entities = [Entity(model='sphere', color=color, position=self.segment_positions[0])]
+        self.controls = controls
+        self.directions = {controls[1]: Vec3(-1, 0, 0), controls[3]: Vec3(1, 0, 0),
+                           controls[0]: Vec3(0, 1, 0), controls[2]: Vec3(0, -1, 0)}
         self.direction = Vec3(0, 0, 0)
-        self.permissions = {'a': 1, 'd': 1, 'w': 1, 's': 1}
-        self.taboo_movement = {'a': 'd', 'd': 'a', 'w': 's', 's': 'w'}
+        self.permissions = {controls[0]: 1, controls[1]: 1, controls[2]: 1, controls[3]: 1}
+        self.taboo_movement = {controls[1]: controls[3], controls[0]: controls[2],
+                               controls[2]: controls[0], controls[3]: controls[1]}
         self.speed, self.score = 12, 0
         self.frame_counter = 0
 
@@ -35,10 +37,13 @@ class Snake:
         self.create_segment(self.segment_positions[0])
 
     def create_segment(self, position):
+        color = self.segment_entities[0].color
         entity = Entity(position=position)
-        Entity(model='sphere', color=color.green, position=position).add_script(
+        Entity(model='sphere', color=color, position=position).add_script(
             SmoothFollow(speed=12, target=entity, offset=(0, 0, 0)))
         self.segment_entities.insert(0, entity)
+        if len(self.segment_entities) > 1:
+            entity.add_script(SmoothFollow(speed=12, target=self.segment_entities[1], offset=(0, 0, 0)))
 
     def run(self):
         self.frame_counter += 1
@@ -49,7 +54,7 @@ class Snake:
                 segment.position = segment_position
 
     def control(self, key):
-        for pressed_key in 'wasd':
+        for pressed_key in self.controls:
             if pressed_key == key and self.permissions[pressed_key]:
                 self.direction = self.directions[pressed_key]
                 self.permissions = dict.fromkeys(self.permissions, 1)
