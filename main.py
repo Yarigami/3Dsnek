@@ -19,6 +19,23 @@ class Game(Ursina):
         Entity(model=Grid(MAP_SIZE, MAP_SIZE), scale=MAP_SIZE,
                position=(MAP_SIZE // 2, MAP_SIZE // 2, -0.01), color=color.black)
 
+        # Add obstacles based on the current map
+        if self.current_map == 2:
+            # Add obstacles for map 2
+            self.add_obstacle(position=(5, 5))
+            self.add_obstacle(position=(15, 15))
+
+        elif self.current_map == 3:
+            # Add obstacles for map 2
+            self.add_obstacle(position=(5, 5))
+            self.add_obstacle(position=(15, 15))
+            self.add_obstacle(position=(25, 25))
+            self.add_obstacle(position=(35, 35))
+            self.add_obstacle(position=(45, 45))
+
+    def add_obstacle(self, position):
+        Entity(model='cube', scale=1, position=(position[0], position[1], 0), color=color.yellow)
+
     def new_game(self):
         # Clear all entities created in the previous game
         for entity in scene.entities:
