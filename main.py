@@ -9,11 +9,10 @@ class Game(Ursina):
         Light(type='ambient', color=(0.5, 0.5, 0.5, 1))
         Light(type='directional', color=(0.5, 0.5, 0.5, 1), direction=(1, 1, 1))
         self.MAP_SIZE = 20
+        self.current_map = 1  # Add a variable to track the current map
         self.new_game()
-        camera.position = (self.MAP_SIZE // 2, -20.5, -20)
-        camera.rotation_x = -57
         self.new_game_flag = False
-        self.game_over_declared = False  # New variable to track if game over message has been printed
+        self.game_over_declared = False
 
     def create_map(self, MAP_SIZE):
         Entity(model='quad', scale=MAP_SIZE, position=(MAP_SIZE // 2, MAP_SIZE // 2, 0), color=color.dark_gray)
@@ -21,27 +20,46 @@ class Game(Ursina):
                position=(MAP_SIZE // 2, MAP_SIZE // 2, -0.01), color=color.black)
 
     def new_game(self):
-        scene.clear()
+        # Clear all entities created in the previous game
+        for entity in scene.entities:
+            destroy(entity)
+
         self.create_map(self.MAP_SIZE)
         if hasattr(self, 'apple') and self.apple:
             destroy(self.apple)
-        # if hasattr(self, 'snake1') and self.snake1:
-        #     destroy(self.snake1)
-        # if hasattr(self, 'snake2') and self.snake2:
-        #     destroy(self.snake2)
         self.apple = Apple(self.MAP_SIZE, model='sphere', color=color.red)
         self.snake1 = Snake(self.MAP_SIZE, controls=['w', 'a', 's', 'd'], color=color.green)
         self.snake2 = Snake(self.MAP_SIZE, controls=['i', 'j', 'k', 'l'], color=color.blue)
-        self.new_game_flag = False
-        self.game_over_declared = False  # Reset the game_over_declared variable
 
-        # Clear the screen after starting a new game
+        # Calculate camera position and rotation based on map size
+        camera_distance = max(self.MAP_SIZE, 15)  # Adjust this value based on your preference
+        camera_position = (self.MAP_SIZE // 2, -self.MAP_SIZE, -camera_distance)
+        camera_rotation_x = -55
+
+        camera.position = camera_position
+        camera.rotation_x = camera_rotation_x
+
+        self.new_game_flag = False
+        self.game_over_declared = False
+
         invoke(print_on_screen, '', position=(0, 0), scale=5, duration=1)
 
     def input(self, key, is_raw=False):
         super().input(key)
 
-        # Clear the screen and start a new game only when the game is over and any key is pressed
+        if key == '1' or key == '2' or key == '3':
+            self.destroy_all_entities()
+            if key == '1':
+                self.MAP_SIZE = 20
+                self.current_map = 1
+            elif key == '2':
+                self.MAP_SIZE = 30
+                self.current_map = 2
+            elif key == '3':
+                self.MAP_SIZE = 40
+
+            self.new_game()
+
         if self.check_game_over(self.snake1) or self.check_game_over(self.snake2):
             self.new_game_flag = True
 
@@ -49,18 +67,14 @@ class Game(Ursina):
             scene.clear()
             self.new_game()
 
-        # Handle snake controls if the game is not over
         if not self.check_game_over(self.snake1) and not self.check_game_over(self.snake2):
             self.snake1.control(key)
             self.snake2.control(key)
 
-        # Handle camera views based on key presses
-        if key == '2':
-            camera.rotation_x = 0
-            camera.position = (self.MAP_SIZE // 2, self.MAP_SIZE // 2, -50)
-        elif key == '3':
-            camera.position = (self.MAP_SIZE // 2, -20.5, -20)
-            camera.rotation_x = -57
+    def destroy_all_entities(self):
+        # Clear all entities in the scene
+        for entity in scene.entities:
+            destroy(entity)
 
     def check_apple_eaten(self, snake):
         if snake.segment_positions[-1] == self.apple.position:
@@ -72,18 +86,17 @@ class Game(Ursina):
         if 0 < segment_positions[-1][0] < self.MAP_SIZE and 0 < segment_positions[-1][1] < self.MAP_SIZE \
                 and len(segment_positions) == len(set(segment_positions)):
             return False
-        if not self.game_over_declared:  # Check if game over message has not been declared yet
+        if not self.game_over_declared:
             if snake == self.snake1:
                 print_on_screen('Player 2 Wins', position=(0, 0), scale=5, duration=1, origin=(0, 0))
             else:
                 print_on_screen('Player 1 Wins', position=(0, 0), scale=5, duration=1, origin=(0, 0))
-            self.game_over_declared = True  # Mark game over message as declared
+            self.game_over_declared = True
             snake.direction = Vec3(0, 0, 0)
             snake.permissions = dict.fromkeys(snake.permissions, 0)
         return True
 
     def update(self):
-        # Display scores only if the game is not over
         if not self.check_game_over(self.snake1) and not self.check_game_over(self.snake2):
             print_on_screen(f'Score Player 1: {self.snake1.score}', position=(-0.85, 0.45), scale=3, duration=1 / 20)
             print_on_screen(f'Score Player 2: {self.snake2.score}', position=(-0.85, 0.35), scale=3, duration=1 / 20)
