@@ -39,9 +39,9 @@ class Snake:
     def create_segment(self, position):
         color = self.segment_entities[0].color
         entity = Entity(position=position)
-        Entity(model='sphere', color=color, position=position).add_script(
-            SmoothFollow(speed=12, target=entity, offset=(0, 0, 0)))
-        self.segment_entities.insert(0, entity)
+        new_segment = Entity(model='sphere', color=color, position=position)
+        new_segment.add_script(SmoothFollow(speed=12, target=entity, offset=(0, 0, 0)))
+        self.segment_entities.insert(0, new_segment)
         if len(self.segment_entities) > 1:
             entity.add_script(SmoothFollow(speed=12, target=self.segment_entities[1], offset=(0, 0, 0)))
 
