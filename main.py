@@ -10,6 +10,7 @@ class Game(Ursina):
         Light(type='directional', color=(0.5, 0.5, 0.5, 1), direction=(1, 1, 1))
         self.MAP_SIZE = 20
         self.current_map = 1  # Add a variable to track the current map
+        self.obstacles = []
         self.new_game()
         self.new_game_flag = False
         self.game_over_declared = False
@@ -34,10 +35,12 @@ class Game(Ursina):
             self.add_obstacle(position=(45, 45))
 
     def add_obstacle(self, position):
-        Entity(model='cube', scale=1, position=(position[0], position[1], 0), color=color.yellow)
+        obstacle = Entity(model='cube', scale=1, position=(position[0], position[1], 0), color=color.yellow)
+        self.obstacles.append(obstacle)
 
     def new_game(self):
         # Clear all entities created in the previous game
+        self.obstacles.clear()
         for entity in scene.entities:
             destroy(entity)
 
@@ -99,19 +102,35 @@ class Game(Ursina):
             self.apple.new_position()
 
     def check_game_over(self, snake):
-        segment_positions = snake.segment_positions
-        if 0 < segment_positions[-1][0] < self.MAP_SIZE and 0 < segment_positions[-1][1] < self.MAP_SIZE \
-                and len(segment_positions) == len(set(segment_positions)):
-            return False
+        head_position = snake.segment_positions[-1]
+        
+        # Cek apakah ular menyentuh obstacles
+        for obstacle in self.obstacles:
+            
+            distance = (head_position - obstacle.position).length()
+            if distance < 1:  
+                self.declare_game_over(snake)
+                return True  
+
+        # Cek apakah ular berada di luar batas
+        if not (0 < head_position.x < self.MAP_SIZE and 0 < head_position.y < self.MAP_SIZE):
+            self.declare_game_over(snake)
+            return True
+
+        # Cek apakah ular menyentuh dirinya sendiri
+        if len(snake.segment_positions) != len(set(snake.segment_positions)):
+            self.declare_game_over(snake)
+            return True
+
+        return False  # Game terus berlanjut
+
+    def declare_game_over(self, snake):
         if not self.game_over_declared:
-            if snake == self.snake1:
-                print_on_screen('Player 2 Wins', position=(0, 0), scale=5, duration=1, origin=(0, 0))
-            else:
-                print_on_screen('Player 1 Wins', position=(0, 0), scale=5, duration=1, origin=(0, 0))
+            winner = 'Player 2' if snake == self.snake1 else 'Player 1'
+            print_on_screen(f'{winner} Wins', position=(0, 0), scale=5, duration=1, origin=(0, 0))
             self.game_over_declared = True
             snake.direction = Vec3(0, 0, 0)
             snake.permissions = dict.fromkeys(snake.permissions, 0)
-        return True
 
     def update(self):
         if not self.check_game_over(self.snake1) and not self.check_game_over(self.snake2):
