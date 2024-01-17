@@ -47,6 +47,7 @@ class Game(Ursina):
         self.create_map(self.MAP_SIZE)
         if hasattr(self, 'apple') and self.apple:
             destroy(self.apple)
+            
         self.apple = Apple(self.MAP_SIZE, self.obstacles, model='sphere', color=color.red)
         self.snake1 = Snake(self.MAP_SIZE, controls=['w', 'a', 's', 'd'], color=color.green)
         self.snake2 = Snake(self.MAP_SIZE, controls=['i', 'j', 'k', 'l'], color=color.blue)
@@ -83,7 +84,7 @@ class Game(Ursina):
         if self.check_game_over(self.snake1) or self.check_game_over(self.snake2):
             self.new_game_flag = True
 
-        if self.new_game_flag and key:
+        if self.new_game_flag and held_keys['left mouse']:
             scene.clear()
             self.new_game()
 
@@ -126,11 +127,22 @@ class Game(Ursina):
 
     def declare_game_over(self, snake):
         if not self.game_over_declared:
-            winner = 'Player 2' if snake == self.snake1 else 'Player 1'
-            print_on_screen(f'{winner} Wins', position=(0, 0), scale=5, duration=1, origin=(0, 0))
-            self.game_over_declared = True
             snake.direction = Vec3(0, 0, 0)
             snake.permissions = dict.fromkeys(snake.permissions, 0)
+            self.game_over_declared = True
+
+            # Don't declare a winner immediately, accumulate points
+            self.snake1_score = self.snake1.score
+            self.snake2_score = self.snake2.score
+
+            if self.snake1_score > self.snake2_score:
+                winner = 'Player 1'
+            elif self.snake2_score > self.snake1_score:
+                winner = 'Player 2'
+            else:
+                winner = 'It\'s a Tie'
+
+            print_on_screen(f'{winner} Wins', position=(0, 0), scale=5, duration=1, origin=(0, 0))
 
     def update(self):
         if not self.check_game_over(self.snake1) and not self.check_game_over(self.snake2):
