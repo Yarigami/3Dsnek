@@ -10,10 +10,20 @@ class Apple(Entity):
 
     def new_position(self):
         while True:
-            new_pos = (randrange(self.MAP_SIZE) + 0.5, randrange(self.MAP_SIZE) + 0.5, -0.5)
-            if not any((Vec3(new_pos) - obstacle.position).length() < 1 for obstacle in self.obstacles):
+            # Generate random position
+            new_position = (randrange(self.MAP_SIZE) + 0.5, randrange(self.MAP_SIZE) + 0.5, -0.5)
+
+            # Check if the new position is not on an obstacle
+            valid_position = True
+            for obstacle in self.obstacles:
+                distance = (Vec2(new_position[0], new_position[1]) - Vec2(obstacle.position.x, obstacle.position.y)).length()
+                if distance < 1:
+                    valid_position = False
+                    break
+
+            if valid_position:
+                self.position = new_position
                 break
-        self.position = new_pos
 
 
 class Snake:

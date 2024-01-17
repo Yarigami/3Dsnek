@@ -9,7 +9,7 @@ class Game(Ursina):
         Light(type='ambient', color=(0.5, 0.5, 0.5, 1))
         Light(type='directional', color=(0.5, 0.5, 0.5, 1), direction=(1, 1, 1))
         self.MAP_SIZE = 20
-        self.current_map = 1  # Add a variable to track the current map
+        self.current_map = 1
         self.obstacles = []
         self.new_game()
         self.new_game_flag = False
@@ -20,26 +20,53 @@ class Game(Ursina):
         Entity(model=Grid(MAP_SIZE, MAP_SIZE), scale=MAP_SIZE,
                position=(MAP_SIZE // 2, MAP_SIZE // 2, -0.01), color=color.black)
 
-        # Add obstacles based on the current map
         if self.current_map == 2:
-            # Add obstacles for map 2
-            self.add_obstacle(position=(5, 5))
-            self.add_obstacle(position=(15, 15))
+            self.add_obstacle(position=(0.5, 5.5))
+            self.add_obstacle(position=(9.5, 3.5))
+            self.add_obstacle(position=(4.5, 14.5))
+            self.add_obstacle(position=(15.5, 15.5))
+            self.add_obstacle(position=(2.5, 1.5))
+            self.add_obstacle(position=(12.5, 3.5))
+            self.add_obstacle(position=(7.5, 17.5))
+            self.add_obstacle(position=(10.5, 19.5))
+            self.add_obstacle(position=(18.5, 5.5))
+            self.add_obstacle(position=(9.5, 9.5))
+            self.add_obstacle(position=(9.5, 10.5))
+            self.add_obstacle(position=(10.5, 9.5))
+            self.add_obstacle(position=(10.5, 10.5))
 
         elif self.current_map == 3:
-            # Add obstacles for map 2
-            self.add_obstacle(position=(5, 5))
-            self.add_obstacle(position=(15, 15))
-            self.add_obstacle(position=(25, 25))
-            self.add_obstacle(position=(35, 35))
-            self.add_obstacle(position=(45, 45))
+            self.add_obstacle(position=(5.5, 5.5))
+            self.add_obstacle(position=(5.5, 6.5))
+            self.add_obstacle(position=(4.5, 5.5))
+            self.add_obstacle(position=(5.5, 4.5))
+            self.add_obstacle(position=(10.5, 10.5))
+            self.add_obstacle(position=(11.5, 10.5))
+            self.add_obstacle(position=(10.5, 11.5))
+            self.add_obstacle(position=(11.5, 11.5))
+            self.add_obstacle(position=(7.5, 5.5))
+            self.add_obstacle(position=(9.5, 10.5))
+            self.add_obstacle(position=(10.5, 10.5))
+            self.add_obstacle(position=(5.5, 15.5))
+            self.add_obstacle(position=(3.5, 11.5))
+            self.add_obstacle(position=(8.5, 13.5))
+            self.add_obstacle(position=(10.5, 14.5))
+            self.add_obstacle(position=(18.5, 17.5))
+            self.add_obstacle(position=(15.5, 19.5))
+            self.add_obstacle(position=(14.5, 17.5))
+            self.add_obstacle(position=(16.5, 5.5))
+            self.add_obstacle(position=(18.5, 7.5))
+            self.add_obstacle(position=(17.5, 5.5))
+            self.add_obstacle(position=(19.5, 19.5))
+            self.add_obstacle(position=(0.5, 0.5))
+            self.add_obstacle(position=(1.5, 19.5))
+            self.add_obstacle(position=(19.5, 0.5))
 
     def add_obstacle(self, position):
         obstacle = Entity(model='cube', scale=1, position=(position[0], position[1], 0), color=color.yellow)
         self.obstacles.append(obstacle)
 
     def new_game(self):
-        # Clear all entities created in the previous game
         self.obstacles.clear()
         for entity in scene.entities:
             destroy(entity)
@@ -52,8 +79,7 @@ class Game(Ursina):
         self.snake1 = Snake(self.MAP_SIZE, controls=['w', 'a', 's', 'd'], color=color.green)
         self.snake2 = Snake(self.MAP_SIZE, controls=['i', 'j', 'k', 'l'], color=color.blue)
 
-        # Calculate camera position and rotation based on map size
-        camera_distance = max(self.MAP_SIZE, 15)  # Adjust this value based on your preference
+        camera_distance = max(self.MAP_SIZE, 15)
         camera_position = (self.MAP_SIZE // 2, -self.MAP_SIZE, -camera_distance)
         camera_rotation_x = -55
 
@@ -73,11 +99,16 @@ class Game(Ursina):
             if key == '1':
                 self.MAP_SIZE = 20
                 self.current_map = 1
+                for obstacle in self.obstacles:
+                    destroy(obstacle)
+                self.obstacles.clear()
+
             elif key == '2':
-                self.MAP_SIZE = 30
+                self.MAP_SIZE = 20
                 self.current_map = 2
             elif key == '3':
-                self.MAP_SIZE = 40
+                self.MAP_SIZE = 20
+                self.current_map = 3
 
             self.new_game()
 
