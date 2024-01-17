@@ -1,15 +1,19 @@
 from ursina import *
 from random import randrange
 
-
 class Apple(Entity):
-    def __init__(self, MAP_SIZE, **kwargs):
+    def __init__(self, MAP_SIZE, obstacles, **kwargs):
         super().__init__(**kwargs)
         self.MAP_SIZE = MAP_SIZE
+        self.obstacles = obstacles
         self.new_position()
 
     def new_position(self):
-        self.position = (randrange(self.MAP_SIZE) + 0.5, randrange(self.MAP_SIZE) + 0.5, -0.5)
+        while True:
+            new_pos = (randrange(self.MAP_SIZE) + 0.5, randrange(self.MAP_SIZE) + 0.5, -0.5)
+            if not any((Vec3(new_pos) - obstacle.position).length() < 1 for obstacle in self.obstacles):
+                break
+        self.position = new_pos
 
 
 class Snake:

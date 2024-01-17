@@ -47,7 +47,7 @@ class Game(Ursina):
         self.create_map(self.MAP_SIZE)
         if hasattr(self, 'apple') and self.apple:
             destroy(self.apple)
-        self.apple = Apple(self.MAP_SIZE, model='sphere', color=color.red)
+        self.apple = Apple(self.MAP_SIZE, self.obstacles, model='sphere', color=color.red)
         self.snake1 = Snake(self.MAP_SIZE, controls=['w', 'a', 's', 'd'], color=color.green)
         self.snake2 = Snake(self.MAP_SIZE, controls=['i', 'j', 'k', 'l'], color=color.blue)
 
